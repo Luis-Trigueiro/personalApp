@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes do Aluno</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div id="aluno-detalhes-section">
+    <h2>👤 Detalhes do Aluno</h2>
+    <div id="dados-aluno"></div>
+
+    <div class="accordion">
+      <button class="accordion-header">Treinos do Aluno</button>
+      <div class="accordion-content">
+        <ul id="trainings-list"></ul>
+
+        <h4>Adicionar Treino</h4>
+        <input id="title" placeholder="Título"><br>
+        <input id="description" placeholder="Descrição"><br>
+        <input id="exercises" placeholder="Exercícios (separados por vírgula)"><br>
+        <button onclick="handleAddTraining()">Adicionar</button>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <button class="accordion-header">Avaliações do Aluno</button>
+      <div class="accordion-content">
+        <ul id="evaluations-list"></ul>
+
+        <h4>Adicionar Avaliação</h4>
+        <input id="peso" placeholder="Peso"><br>
+        <input id="gordura" placeholder="% Gordura"><br>
+        <button onclick="handleAddEvaluation()">Adicionar</button>
+      </div>
+    </div>
+
+    <a href="index.html">⬅ Voltar</a>
+  </div>
+
+  <script type="module" src="/src/aluno-detalhes.js"></script>
+</body>
+</html>

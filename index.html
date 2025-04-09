@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>App Personal Trainer</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+
+<body>
+  <div id="login-section">
+    <h2>Login / Registro</h2>
+    <input id="email" placeholder="Email"><br>
+    <input id="password" type="password" placeholder="Senha"><br>
+    <input id="nome" placeholder="Nome completo"><br>
+    <input id="idade" placeholder="Idade"><br>
+    <input id="objetivo" placeholder="Objetivo (ex: emagrecimento)"><br>
+
+    <div class="radio-group">
+      <label><input type="radio" name="tipo-usuario" value="aluno" checked> Aluno</label>
+      <label><input type="radio" name="tipo-usuario" value="personal"> Personal</label>
+    </div>
+
+    <div class="button-group">
+      <button onclick="handleLogin()">Login</button>
+      <button onclick="handleRegister()">Registrar</button>
+    </div>
+  </div>
+
+  <div id="user-section" style="display: none;">
+    <!-- <p>Usuário logado: <span id="user-id"></span></p>-->
+    <button onclick="handleLogout()">Logout</button>
+
+    <!-- ALUNO -->
+    <div id="aluno-section" style="display: none;">
+      <div style="background:#e0f7fa;padding:12px;border-left:4px solid #00acc1;border-radius:4px;margin-bottom:10px;">
+        <p id="boas-vindas-msg"></p>
+        <p id="personal-info" style="margin-top:5px;font-size:0.95rem;"></p>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">Meus Treinos</button>
+        <div class="accordion-content">
+          <ul id="trainings-list"></ul>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">Minhas Avaliações</button>
+        <div class="accordion-content">
+          <ul id="evaluations-list"></ul>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">Histórico de Avaliações</button>
+        <div class="accordion-content">
+          <ul id="historico-avaliacoes"></ul>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">Meu Perfil</button>
+        <div class="accordion-content" id="perfil-aluno">
+          <label>Nome:</label>
+          <input id="perfil-nome" placeholder="Seu nome"><br>
+          <label>Idade:</label>
+          <input id="perfil-idade" placeholder="Sua idade"><br>
+          <label>Objetivo:</label>
+          <input id="perfil-objetivo" placeholder="Ex: emagrecimento, força"><br>
+          <label>Email (não editável):</label>
+          <input id="perfil-email" disabled><br>
+          <button onclick="salvarPerfil()">Salvar Alterações</button>
+          <p id="perfil-msg" style="color: green;"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERSONAL -->
+    <div id="personal-section" style="display: none;">
+      <div style="background:#e8f5e9;padding:12px;border-left:4px solid #43a047;border-radius:4px;margin-bottom:10px;">
+        <p>Você está logado como <strong>personal</strong>.</p>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">Buscar aluno por email</button>
+        <div class="accordion-content">
+          <input id="search-email" placeholder="Email do aluno">
+          <button onclick="buscarAlunoPorEmail()">Buscar</button>
+          <p id="aluno-encontrado"></p>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">Cadastrar Treino para Aluno</button>
+        <div class="accordion-content">
+          <input id="aluno-id" placeholder="ID do aluno" readonly><br>
+          <input id="title" placeholder="Título do treino"><br>
+          <input id="description" placeholder="Descrição"><br>
+          <input id="exercises" placeholder="Exercícios (separados por vírgula)"><br>
+          <button onclick="handleAddTraining()">Adicionar Treino</button>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">Cadastrar Avaliação para Aluno</button>
+        <div class="accordion-content">
+          <input id="aluno-id-eval" placeholder="ID do aluno" readonly><br>
+          <input id="peso" placeholder="Peso"><br>
+          <input id="gordura" placeholder="% Gordura"><br>
+          <button onclick="handleAddEvaluation()">Adicionar Avaliação</button>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">Associar Aluno</button>
+        <div class="accordion-content">
+          <input id="email-aluno-associar" placeholder="Email do aluno"><br>
+          <button onclick="associarAluno()">Associar Aluno</button>
+          <p id="aluno-associado-msg"></p>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">Lista de Alunos</button>
+        <div class="accordion-content">
+          <ul id="alunos-lista"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+
+  <!-- JS para ativar accordion -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+          header.classList.toggle('active');
+          const content = header.nextElementSibling;
+          content.style.display = content.style.display === "block" ? "none" : "block";
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

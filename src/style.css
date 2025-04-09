@@ -1,0 +1,212 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background-color: #d6f0f5;
+  color: #333;
+  padding: 20px;
+}
+
+#login-section {
+  max-width: 400px;
+  margin: 40px auto;
+  background-color: #ffffff;
+  padding: 30px 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+input,
+button {
+  margin: 6px 0;
+  padding: 10px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+button {
+  background-color: #008CBA;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #005f73;
+}
+
+h2,
+h3 {
+  margin-top: 20px;
+  color: #005f73;
+  font-weight: 600;
+}
+
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+li {
+  background-color: white;
+  padding: 10px;
+  margin-bottom: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  max-width: 100%;
+}
+
+label {
+  font-size: 0.95rem;
+}
+
+#user-section {
+  margin-top: 30px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#aluno-section {
+  background-color: #e0f7fa;
+  border-left: 4px solid #00acc1;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 4px;
+}
+
+#personal-section {
+  background-color: #e8f5e9;
+  border-left: 4px solid #43a047;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 4px;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+p {
+  font-size: 0.95rem;
+}
+
+/* ✅ Accordion (expansion panels) */
+.accordion {
+  margin-bottom: 12px;
+}
+
+.accordion-header {
+  width: 100%;
+  text-align: left;
+  font-weight: bold;
+  padding: 12px;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.accordion-content {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  padding: 12px;
+  display: none;
+}
+
+.accordion-header.active + .accordion-content {
+  display: block;
+}
+
+/* ✅ Lista de treinos e avaliações */
+#trainings-list li,
+#evaluations-list li {
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+/* ✅ Exercícios dentro do treino */
+.exercicios {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+.exercicios li {
+  list-style-type: disc;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  font-size: 0.95rem;
+}
+
+/* ✅ Histórico textual */
+#historico-avaliacoes li {
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+/* ✅ Perfil do aluno */
+#perfil-aluno {
+  background: #fff;
+  padding: 15px;
+  margin-top: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+#perfil-aluno label {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+#perfil-aluno input {
+  margin-bottom: 10px;
+}
+
+/* ✅ Responsivo */
+@media (max-width: 600px) {
+  #login-section {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  input,
+  button {
+    width: 100%;
+  }
+
+  li {
+    max-width: 100%;
+  }
+
+  .button-group,
+  .radio-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
