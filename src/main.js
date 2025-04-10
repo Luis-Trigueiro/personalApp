@@ -40,20 +40,44 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchEmail = document.getElementById("search-email");
   const alunoEncontrado = document.getElementById("aluno-encontrado");
 
+
   // Registro
   window.handleRegister = async function () {
-    const tipoUsuario = document.querySelector('input[name="tipo-usuario"]:checked').value;
-    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
-    const user = userCredential.user;
+    const regEmail = document.getElementById("reg-email").value.trim();
+    const regPassword = document.getElementById("reg-password").value.trim();
+    const tipoUsuario = document.querySelector('input[name="tipo-usuario"]:checked')?.value;
+    const nome = document.getElementById("nome").value.trim();
+    const idade = document.getElementById("idade").value.trim();
+    const objetivo = document.getElementById("objetivo")?.value.trim(); // Pode estar oculto
 
-    await setDoc(doc(db, "users", user.uid), {
-      email: user.email,
-      nome: nome.value,
-      idade: idade.value,
-      objetivo: objetivo.value,
-      tipo: tipoUsuario
-    });
+    // 🛑 Verificação de campos obrigatórios
+    if (!regEmail || !regPassword || !nome || !idade || !tipoUsuario || (tipoUsuario === "aluno" && !objetivo)) {
+      alert("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, regEmail, regPassword);
+      const user = userCredential.user;
+
+      const userData = {
+        email: user.email,
+        nome,
+        idade,
+        tipo: tipoUsuario
+      };
+
+      if (tipoUsuario === "aluno") {
+        userData.objetivo = objetivo;
+      }
+
+      await setDoc(doc(db, "users", user.uid), userData);
+    } catch (error) {
+      console.error("Erro ao registrar:", error);
+      alert("Erro ao registrar: " + error.message);
+    }
   };
+
 
   // Login
   window.handleLogin = async function () {
@@ -131,6 +155,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+
+  window.removerAluno = async function (alunoId) {
+    if (!confirm("Deseja realmente remover este aluno da sua lista?")) return;
+
+    const user = auth.currentUser;
+
+    // Atualiza o aluno: remove o personalId
+    await setDoc(doc(db, "users", alunoId), {
+      personalId: null
+    }, { merge: true });
+
+    // Atualiza o personal: remove o aluno da lista
+    const personalDocRef = doc(db, "users", user.uid);
+    const personalSnap = await getDoc(personalDocRef);
+    const personalData = personalSnap.data();
+
+    const novaLista = (personalData.alunos || []).filter(id => id !== alunoId);
+    await setDoc(personalDocRef, { alunos: novaLista }, { merge: true });
+
+    // Recarrega a lista
+    location.reload();
+  };
+
   // Salvar perfil
   window.salvarPerfil = async function () {
     const nome = document.getElementById("perfil-nome").value;
@@ -167,15 +214,33 @@ document.addEventListener("DOMContentLoaded", () => {
     if (userData.tipo === "personal") {
       if (personalSection) personalSection.style.display = "block";
       if (alunoSection) alunoSection.style.display = "none";
+      document.getElementById("boas-vindas-personal").innerText = `👋 Bem-vindo(a), ${userData.nome || "Personal"}!`;
+
+      document.querySelector('.accordion-header[data-section="buscar"]').parentElement.style.display = "none";
+      document.querySelector('.accordion-header[data-section="treino"]').parentElement.style.display = "none";
+      document.querySelector('.accordion-header[data-section="avaliacao"]').parentElement.style.display = "none";
+
 
       const alunosPromises = (userData.alunos || []).map(async (id) => {
         const alunoDoc = await getDoc(doc(db, "users", id));
         const d = alunoDoc.data();
-        return `<li>${d.nome || d.email} (${id})</li>`;
+        return {
+          nome: d.nome || d.email,
+          id
+        };
       });
 
+
       const alunosList = await Promise.all(alunosPromises);
-      if (alunosLista) alunosLista.innerHTML = alunosList.join("");
+      alunosLista.innerHTML = alunosList.map(({ nome, id }) => `
+  <li>
+    <a href="aluno-detalhes.html?id=${id}" class="aluno-link">${nome}</a>
+    <button onclick="removerAluno('${id}')" class="btn-remover-aluno">❌ Remover</button>
+  </li>
+`).join("");
+
+
+
 
     } else if (userData.tipo === "aluno") {
       if (alunoSection) alunoSection.style.display = "block";
@@ -240,5 +305,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return `<li>📅 ${data} - Peso: ${e.peso}kg - Gordura: ${e.gordura}%</li>`;
       }).join("");
     }
+    const loading = document.getElementById("loading-screen");
+    if (loading) loading.style.display = "none";
+
   });
 });

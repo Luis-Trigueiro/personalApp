@@ -11,57 +11,74 @@
 <body>
   <div id="login-section">
     <h2>Login / Registro</h2>
-    <input id="email" placeholder="Email"><br>
-    <input id="password" type="password" placeholder="Senha"><br>
-    <input id="nome" placeholder="Nome completo"><br>
-    <input id="idade" placeholder="Idade"><br>
-    <input id="objetivo" placeholder="Objetivo (ex: emagrecimento)"><br>
 
-    <div class="radio-group">
-      <label><input type="radio" name="tipo-usuario" value="aluno" checked> Aluno</label>
-      <label><input type="radio" name="tipo-usuario" value="personal"> Personal</label>
+    <div class="tab-selector">
+      <button id="btn-login-tab" class="tab active">Login</button>
+      <button id="btn-register-tab" class="tab">Registrar</button>
     </div>
 
-    <div class="button-group">
+    <!-- LOGIN -->
+    <div id="login-form">
+      <input id="email" placeholder="Email"><br>
+      <input id="password" type="password" placeholder="Senha"><br>
       <button onclick="handleLogin()">Login</button>
+    </div>
+
+    <!-- REGISTRO -->
+    <div id="register-form" style="display: none;">
+      <input id="reg-email" placeholder="Email" required><br>
+      <input id="reg-password" type="password" required placeholder="Senha"><br>
+      <input id="nome" placeholder="Nome completo" required><br>
+      <input id="idade" placeholder="Idade" required><br>
+      <div id="objetivo-container">
+        <input id="objetivo" placeholder="Objetivo (ex: emagrecimento)" required><br>
+      </div>
+
+      <div class="radio-group">
+        <label><input type="radio" name="tipo-usuario" value="aluno" checked> Aluno</label>
+        <label><input type="radio" name="tipo-usuario" value="personal"> Personal</label>
+      </div>
+
       <button onclick="handleRegister()">Registrar</button>
     </div>
   </div>
 
+
   <div id="user-section" style="display: none;">
-    <!-- <p>Usuário logado: <span id="user-id"></span></p>-->
-    <button onclick="handleLogout()">Logout</button>
+    <div class="logout-container">
+      <button id="logout-btn" onclick="handleLogout()" class="logout-btn">Sair</button>
+    </div>
 
     <!-- ALUNO -->
     <div id="aluno-section" style="display: none;">
-      <div style="background:#e0f7fa;padding:12px;border-left:4px solid #00acc1;border-radius:4px;margin-bottom:10px;">
+      <div class="info-box aluno">
         <p id="boas-vindas-msg"></p>
-        <p id="personal-info" style="margin-top:5px;font-size:0.95rem;"></p>
+        <p id="personal-info"></p>
       </div>
 
       <div class="accordion">
-        <button class="accordion-header">Meus Treinos</button>
+        <button class="accordion-header">🏋️‍♂️ Meus Treinos</button>
         <div class="accordion-content">
           <ul id="trainings-list"></ul>
         </div>
       </div>
 
       <div class="accordion">
-        <button class="accordion-header">Minhas Avaliações</button>
+        <button class="accordion-header">📊 Minhas Avaliações</button>
         <div class="accordion-content">
           <ul id="evaluations-list"></ul>
         </div>
       </div>
 
       <div class="accordion">
-        <button class="accordion-header">Histórico de Avaliações</button>
+        <button class="accordion-header">📅 Histórico de Avaliações</button>
         <div class="accordion-content">
           <ul id="historico-avaliacoes"></ul>
         </div>
       </div>
 
       <div class="accordion">
-        <button class="accordion-header">Meu Perfil</button>
+        <button class="accordion-header">👤 Meu Perfil</button>
         <div class="accordion-content" id="perfil-aluno">
           <label>Nome:</label>
           <input id="perfil-nome" placeholder="Seu nome"><br>
@@ -79,12 +96,13 @@
 
     <!-- PERSONAL -->
     <div id="personal-section" style="display: none;">
-      <div style="background:#e8f5e9;padding:12px;border-left:4px solid #43a047;border-radius:4px;margin-bottom:10px;">
+      <div class="info-box personal">
         <p>Você está logado como <strong>personal</strong>.</p>
+        <p id="boas-vindas-personal" class="mensagem-boas-vindas"></p>
       </div>
 
       <div class="accordion">
-        <button class="accordion-header">Buscar aluno por email</button>
+        <button class="accordion-header" data-section="buscar">🔍 Buscar aluno por email</button>
         <div class="accordion-content">
           <input id="search-email" placeholder="Email do aluno">
           <button onclick="buscarAlunoPorEmail()">Buscar</button>
@@ -93,7 +111,7 @@
       </div>
 
       <div class="accordion">
-        <button class="accordion-header">Cadastrar Treino para Aluno</button>
+        <button class="accordion-header" data-section="treino">➕ Cadastrar Treino</button>
         <div class="accordion-content">
           <input id="aluno-id" placeholder="ID do aluno" readonly><br>
           <input id="title" placeholder="Título do treino"><br>
@@ -104,7 +122,7 @@
       </div>
 
       <div class="accordion">
-        <button class="accordion-header">Cadastrar Avaliação para Aluno</button>
+        <button class="accordion-header" data-section="avaliacao">📈 Cadastrar Avaliação</button>
         <div class="accordion-content">
           <input id="aluno-id-eval" placeholder="ID do aluno" readonly><br>
           <input id="peso" placeholder="Peso"><br>
@@ -114,7 +132,7 @@
       </div>
 
       <div class="accordion">
-        <button class="accordion-header">Associar Aluno</button>
+        <button class="accordion-header">🤝 Associar Aluno</button>
         <div class="accordion-content">
           <input id="email-aluno-associar" placeholder="Email do aluno"><br>
           <button onclick="associarAluno()">Associar Aluno</button>
@@ -123,7 +141,7 @@
       </div>
 
       <div class="accordion">
-        <button class="accordion-header">Lista de Alunos</button>
+        <button class="accordion-header">📋 Lista de Alunos</button>
         <div class="accordion-content">
           <ul id="alunos-lista"></ul>
         </div>
@@ -133,7 +151,7 @@
 
   <script type="module" src="/src/main.js"></script>
 
-  <!-- JS para ativar accordion -->
+  <!-- JS do accordion -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll('.accordion-header').forEach(header => {
@@ -143,6 +161,33 @@
           content.style.display = content.style.display === "block" ? "none" : "block";
         });
       });
+    });
+    document.getElementById("btn-login-tab").onclick = () => {
+      document.getElementById("login-form").style.display = "block";
+      document.getElementById("register-form").style.display = "none";
+      document.getElementById("btn-login-tab").classList.add("active");
+      document.getElementById("btn-register-tab").classList.remove("active");
+    };
+
+    document.getElementById("btn-register-tab").onclick = () => {
+      document.getElementById("login-form").style.display = "none";
+      document.getElementById("register-form").style.display = "block";
+      document.getElementById("btn-register-tab").classList.add("active");
+      document.getElementById("btn-login-tab").classList.remove("active");
+    };
+
+    document.querySelectorAll('input[name="tipo-usuario"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
+        const isAluno = document.querySelector('input[name="tipo-usuario"]:checked').value === "aluno";
+        const objetivoContainer = document.getElementById("objetivo-container");
+        objetivoContainer.style.display = isAluno ? "block" : "none";
+      });
+    });
+
+    // Executa logo no carregamento da página também:
+    window.addEventListener("DOMContentLoaded", () => {
+      const isAluno = document.querySelector('input[name="tipo-usuario"]:checked').value === "aluno";
+      document.getElementById("objetivo-container").style.display = isAluno ? "block" : "none";
     });
   </script>
 </body>

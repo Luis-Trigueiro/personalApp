@@ -1,26 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Detalhes do Aluno</title>
-  <link rel="stylesheet" href="/src/style.css">
+  <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
   <div id="aluno-detalhes-section">
     <h2>👤 Detalhes do Aluno</h2>
-    <div id="dados-aluno"></div>
+    <div id="dados-aluno" class="info-box"></div>
 
     <div class="accordion">
       <button class="accordion-header">Treinos do Aluno</button>
       <div class="accordion-content">
         <ul id="trainings-list"></ul>
 
-        <h4>Adicionar Treino</h4>
+        <h4 style="margin-top:10px;">Adicionar / Editar Treino</h4>
         <input id="title" placeholder="Título"><br>
         <input id="description" placeholder="Descrição"><br>
         <input id="exercises" placeholder="Exercícios (separados por vírgula)"><br>
-        <button onclick="handleAddTraining()">Adicionar</button>
+        <button id="btn-adicionar-treino" onclick="handleAddTraining()">Adicionar</button>
       </div>
     </div>
 
@@ -29,16 +29,36 @@
       <div class="accordion-content">
         <ul id="evaluations-list"></ul>
 
-        <h4>Adicionar Avaliação</h4>
+        <h4 style="margin-top:10px;">Adicionar Avaliação</h4>
         <input id="peso" placeholder="Peso"><br>
         <input id="gordura" placeholder="% Gordura"><br>
         <button onclick="handleAddEvaluation()">Adicionar</button>
       </div>
     </div>
 
-    <a href="index.html">⬅ Voltar</a>
+    <div class="accordion">
+      <button class="accordion-header">↩ Voltar</button>
+      <div class="accordion-content">
+        <a href="index.html">
+          <button class="logout-btn" style="margin-top: 10px;">Voltar</button>
+        </a>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="/src/aluno-detalhes.js"></script>
+
+  <!-- JS accordion -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+          header.classList.toggle('active');
+          const content = header.nextElementSibling;
+          content.style.display = content.style.display === "block" ? "none" : "block";
+        });
+      });
+    });
+  </script>
 </body>
 </html>
