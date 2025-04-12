@@ -1,4 +1,4 @@
-package com.personal.app;
+package com.personaltrainerie.app;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -1,10 +1,14 @@
+// importa auth e db já configurados
 import { auth, db } from "./firebase.js";
+
+// importa funções específicas da CDN
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut
-} from "firebase/auth";
+} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
 import {
   collection,
   getDocs,
@@ -14,7 +18,8 @@ import {
   addDoc,
   query,
   where
-} from "firebase/firestore";
+} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
 
 document.addEventListener("DOMContentLoaded", () => {
   // Elementos DOM
@@ -39,6 +44,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const alunosLista = document.getElementById("alunos-lista");
   const searchEmail = document.getElementById("search-email");
   const alunoEncontrado = document.getElementById("aluno-encontrado");
+
+  const loading = document.getElementById("loading-screen");
+if (loading) loading.style.display = "flex";
+
+// esconde todas as seções
+if (userSection) userSection.style.display = "none";
+if (personalSection) personalSection.style.display = "none";
+if (alunoSection) alunoSection.style.display = "none";
 
 
   // Registro
@@ -153,6 +166,9 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       document.getElementById("aluno-associado-msg").innerText = "Aluno não encontrado.";
     }
+   
+      carregarAlunos(auth.currentUser.uid);
+    
   };
 
 
@@ -197,16 +213,47 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
   };
 
+  async function carregarAlunos(userId) {
+    const alunosLista = document.getElementById("alunos-lista");
+    if (!alunosLista) return;
+  
+    const personalDocRef = doc(db, "users", userId);
+    const personalSnap = await getDoc(personalDocRef);
+    const personalData = personalSnap.data();
+  
+    const alunosPromises = (personalData.alunos || []).map(async (id) => {
+      const alunoDoc = await getDoc(doc(db, "users", id));
+      const d = alunoDoc.data();
+      return {
+        nome: d.nome || d.email,
+        id
+      };
+    });
+  
+    const alunosList = await Promise.all(alunosPromises);
+  
+    alunosLista.innerHTML = alunosList.map(({ nome, id }) => `
+      <li>
+        <a href="aluno-detalhes.html?id=${id}" class="aluno-link">${nome}</a>
+        <button onclick="removerAluno('${id}')" class="btn-remover-aluno">❌ Remover</button>
+      </li>
+    `).join("");
+  }
+  
+
   // Estado do usuário
   onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      if (loginSection) loginSection.style.display = "block";
-      if (userSection) userSection.style.display = "none";
-      return;
-    }
-
-    if (loginSection) loginSection.style.display = "none";
-    if (userSection) userSection.style.display = "block";
+    try {
+      if (!user) {
+        if (loginSection) loginSection.style.display = "block";
+        if (userSection) userSection.style.display = "none";
+        const loading = document.getElementById("loading-screen");
+        if (loading) loading.style.display = "none";
+        return;
+      }
+  
+      if (loginSection) loginSection.style.display = "none";
+      if (userSection) userSection.style.display = "block";
 
     const userDoc = await getDoc(doc(db, "users", user.uid));
     const userData = userDoc.data();
@@ -221,25 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelector('.accordion-header[data-section="avaliacao"]').parentElement.style.display = "none";
 
 
-      const alunosPromises = (userData.alunos || []).map(async (id) => {
-        const alunoDoc = await getDoc(doc(db, "users", id));
-        const d = alunoDoc.data();
-        return {
-          nome: d.nome || d.email,
-          id
-        };
-      });
-
-
-      const alunosList = await Promise.all(alunosPromises);
-      alunosLista.innerHTML = alunosList.map(({ nome, id }) => `
-  <li>
-    <a href="aluno-detalhes.html?id=${id}" class="aluno-link">${nome}</a>
-    <button onclick="removerAluno('${id}')" class="btn-remover-aluno">❌ Remover</button>
-  </li>
-`).join("");
-
-
+      await carregarAlunos(user.uid);
 
 
     } else if (userData.tipo === "aluno") {
@@ -307,6 +336,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const loading = document.getElementById("loading-screen");
     if (loading) loading.style.display = "none";
+    if (loading) loading.style.display = "none";
+  } catch (err) {
+    console.error("Erro no onAuthStateChanged:", err);
+  } finally {
+    const loading = document.getElementById("loading-screen");
+    if (loading) loading.style.display = "none";
+  }
 
   });
 });
