@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detalhes do Aluno</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div id="aluno-detalhes-section">
+    <h2>👤 Detalhes do Aluno</h2>
+    <div id="dados-aluno" class="info-box"></div>
+
+    <!-- LISTA DE TREINOS -->
+    <div class="accordion">
+      <button class="accordion-header">Treinos do Aluno</button>
+      <div class="accordion-content">
+        <ul id="trainings-list"></ul>
+      </div>
+    </div>
+
+    <!-- ADICIONAR TREINO -->
+    <div class="accordion">
+      <button class="accordion-header">Adicionar Treino</button>
+      <div class="accordion-content">
+        <input id="title" placeholder="Título do treino"><br>
+        <input id="description" placeholder="Descrição do treino"><br>
+
+        <div class="exercise-add-section">
+          <h4>Adicionar Exercício</h4>
+          <input id="exercise-name" placeholder="Nome do exercício"><br>
+          <input id="exercise-sets" placeholder="Séries"><br>
+          <input id="exercise-reps" placeholder="Repetições"><br>
+          <input id="exercise-weight" placeholder="Carga (kg)"><br>
+          <button onclick="adicionarExercicio()">➕ Adicionar Exercício</button>
+        </div>
+
+        <h4>Pré-visualização dos exercícios</h4>
+        <ul id="exercise-preview-list"></ul>
+
+        <button id="btn-adicionar-treino" onclick="handleAddTraining()">Salvar Treino</button>
+      </div>
+    </div>
+
+    <!-- AVALIAÇÕES -->
+    <div class="accordion">
+      <button class="accordion-header">Avaliações do Aluno</button>
+      <div class="accordion-content">
+        <ul id="evaluations-list"></ul>
+
+        <h4>Adicionar / Editar Avaliação</h4>
+        <input id="peso" type="number" min="0" placeholder="Peso (kg)">
+        <input id="gordura" type="number" min="0" placeholder="% Gordura"><br>
+        <button id="btn-adicionar-avaliacao" onclick="handleAddEvaluation()">Adicionar</button>
+      </div>
+    </div>
+
+    <!-- VOLTAR -->
+    <div class="accordion">
+      <a href="index.html"><button class="accordion-header">↩ Voltar</button></a>
+    </div>
+  </div>
+
+  <script type="module" src="./aluno-detalhes.js"></script>
+
+  <!-- Accordion ativação -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+          header.classList.toggle('active');
+          const content = header.nextElementSibling;
+          if (content) {
+            content.style.display = content.style.display === "block" ? "none" : "block";
+          }
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

@@ -1,5 +1,6 @@
 {
-  "appId": "com.personal.app",
-  "appName": "personal App",
-  "webDir": "dist"
+  "appId": "com.personaltrainerpt.app",
+  "appName": "Personal Trainer App",
+  "webDir": "public",
+  "bundledWebRuntime": false
 }
