@@ -248,7 +248,199 @@ ul li {
   background-color: #388e3c;
 }
 
+/* Formulário de edição de avaliação */
+.form-edit-avaliacao {
+  background: #ede7f6;
+  padding: 10px;
+  border: 1px solid #b39ddb;
+  border-left: 4px solid #7e57c2;
+  border-radius: 4px;
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
 
+.form-edit-avaliacao input {
+  margin-bottom: 6px;
+  width: 100%;
+}
+
+.form-edit-avaliacao button {
+  background: #7e57c2;
+  font-size: 0.85rem;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin-right: 6px;
+  cursor: pointer;
+}
+
+.form-edit-avaliacao button:hover {
+  background: #673ab7;
+}
+
+.avaliacao-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  border-radius: 5px;
+  margin-top: 6px;
+}
+
+.form-edit-avaliacao {
+  background: #fff3e0;
+  padding: 10px;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.form-edit-avaliacao input {
+  margin-bottom: 6px;
+  width: 100%;
+}
+
+.form-edit-avaliacao button {
+  font-size: 0.85rem;
+  padding: 6px 10px;
+}
+
+.cancel-btn {
+  background: #e53935;
+  color: white;
+  font-weight: bold;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background: #c62828;
+}
+
+.form-add-avaliacao {
+  background: #f1f8e9;
+  padding: 12px;
+  border: 1px solid #c5e1a5;
+  border-left: 4px solid #8bc34a;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.form-add-avaliacao input {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.btn-danger {
+  margin-top: 10px;
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background-color: #b71c1c;
+}
+
+.accordion-header.danger-btn {
+  background-color: crimson;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.accordion-header.danger-btn:hover {
+  background-color: #b71c1c;
+  transition: background 0.3s;
+}
+
+
+.add-ex-btn {
+  margin-top: 8px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-ex-btn:hover {
+  background-color: #388e3c;
+}
+
+.form-edit-avaliacao {
+  position: relative;
+  z-index: 10;
+  max-width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.modal {
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 6px;
+  max-width: 400px;
+  width: 90%;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+#modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.6);
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 320px;
+  width: 90%;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
 
 /* Responsivo */
 @media (max-width: 480px) {
@@ -267,4 +459,20 @@ ul li {
   .botoes-treino {
     flex-direction: column;
   }
+
+   .form-edit-avaliacao {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .botoes-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .botoes-inline button {
+    width: 100%;
+  }
+
+  
 }

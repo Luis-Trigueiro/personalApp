@@ -93,6 +93,18 @@
           <input id="perfil-email" disabled><br>
           <button onclick="salvarPerfil()">Salvar Alterações</button>
           <p id="perfil-msg" style="color: green;"></p>
+          <div class="accordion">
+            <button class="accordion-header danger-btn">🗑️ Excluir Conta</button>
+            <div class="accordion-content">
+              <p style="color: red; font-size: 0.9rem;">
+                Esta ação é irreversível. Todos os seus dados e treinos serão removidos.<br>
+                Digite sua senha para confirmar:
+              </p>
+              <input type="password" id="senha-exclusao-aluno" placeholder="Sua senha"><br>
+              <button onclick="deletarContaAluno()">Confirmar Exclusão</button>
+            </div>
+          </div>
+          
         </div>
       </div>
     </div>
@@ -149,6 +161,18 @@
           <ul id="alunos-lista"></ul>
         </div>
       </div>
+      <div class="accordion">
+        <button class="accordion-header danger-btn">🗑️ Excluir Conta</button>
+        <div class="accordion-content">
+          <p style="color: red; font-size: 0.9rem;">
+            Esta ação é irreversível. Todos os seus dados e vínculos com alunos serão removidos.<br>
+            Digite sua senha para confirmar:
+          </p>
+          <input type="password" id="senha-exclusao" placeholder="Sua senha"><br>
+          <button onclick="deletarPerfilComSenha()">Confirmar Exclusão</button>
+        </div>
+      </div>
+      
     </div>
   </div>
 
