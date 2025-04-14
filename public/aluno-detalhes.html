@@ -30,7 +30,73 @@
 
         <div class="exercise-add-section">
           <h4>Adicionar Exercício</h4>
-          <input id="exercise-name" placeholder="Nome do exercício"><br>
+          <input id="exercise-name" list="lista-exercicios" placeholder="Nome do exercício">
+
+          <datalist id="lista-exercicios">
+            <!-- Peito -->
+            <option value="Supino Reto com Barra">
+            <option value="Supino Inclinado com Halteres">
+            <option value="Crucifixo no Banco Reto">
+            <option value="Crossover no Cabo">
+            <option value="Flexão de Braço">
+
+              <!-- Costas -->
+            <option value="Puxada na Frente na Barra Guiada">
+            <option value="Remada Curvada com Barra">
+            <option value="Remada Baixa no Cabo">
+            <option value="Puxada na Barra Fixa">
+            <option value="Pullover no Cabo">
+
+              <!-- Pernas -->
+            <option value="Agachamento Livre">
+            <option value="Leg Press 45°">
+            <option value="Cadeira Extensora">
+            <option value="Mesa Flexora">
+            <option value="Cadeira Abdutora">
+            <option value="Avanço com Halteres">
+            <option value="Stiff com Halteres">
+            <option value="Panturrilha em Pé">
+            <option value="Panturrilha Sentado">
+            <option value="Agachamento Búlgaro">
+
+              <!-- Ombros -->
+            <option value="Desenvolvimento com Halteres">
+            <option value="Elevação Lateral">
+            <option value="Elevação Frontal">
+            <option value="Remada Alta com Barra">
+            <option value="Crucifixo Inverso no Peck Deck">
+
+              <!-- Bíceps -->
+            <option value="Rosca Direta com Barra">
+            <option value="Rosca Alternada com Halteres">
+            <option value="Rosca Concentrada">
+            <option value="Rosca Scott na Máquina">
+            <option value="Rosca Martelo">
+
+              <!-- Tríceps -->
+            <option value="Tríceps Pulley com Barra">
+            <option value="Tríceps Testa com Barra">
+            <option value="Tríceps Francês com Halteres">
+            <option value="Tríceps Coice">
+            <option value="Mergulho entre Bancos">
+
+              <!-- Abdômen -->
+            <option value="Abdominal Supra no Solo">
+            <option value="Prancha Isométrica">
+            <option value="Abdominal Infra com Elevação de Pernas">
+            <option value="Abdominal na Corda">
+            <option value="Abdominal Lateral com Peso">
+
+              <!-- Cardio / Funcionais -->
+            <option value="Esteira">
+            <option value="Bicicleta Ergométrica">
+            <option value="Elíptico">
+            <option value="Pular Corda">
+            <option value="Burpee">
+            <option value="Escalador">
+            <option value="Polichinelo">
+          </datalist>
+
           <input id="exercise-sets" placeholder="Séries"><br>
           <input id="exercise-reps" placeholder="Repetições"><br>
           <input id="exercise-weight" placeholder="Carga (kg)"><br>
@@ -45,17 +111,51 @@
     </div>
 
     <!-- AVALIAÇÕES -->
+    <!-- AVALIAÇÕES -->
     <div class="accordion">
       <button class="accordion-header">Avaliações do Aluno</button>
       <div class="accordion-content">
         <ul id="evaluations-list"></ul>
-
-        <h4>Adicionar / Editar Avaliação</h4>
-        <input id="peso" type="number" min="0" placeholder="Peso (kg)">
-        <input id="gordura" type="number" min="0" placeholder="% Gordura"><br>
-        <button id="btn-adicionar-avaliacao" onclick="handleAddEvaluation()">Adicionar</button>
       </div>
     </div>
+
+    <!-- ADICIONAR AVALIAÇÃO -->
+    <div class="accordion">
+      <button class="accordion-header">Adicionar Avaliação</button>
+      <div class="accordion-content">
+        <div class="form-add-avaliacao">
+          <input id="peso" type="number" min="0" placeholder="Peso (kg)">
+          <input id="gordura" type="number" min="0" placeholder="% Gordura">
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <button id="btn-adicionar-avaliacao" onclick="handleAddEvaluation()">💾 Salvar</button>
+            <button onclick="cancelarEdicaoAvaliacao()">❌ Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="popup-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <span id="modal-close" class="close">&times;</span>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
+    <div id="modal-overlay" style="display:none;">
+      <div id="modal-content">
+        <h3 id="modal-title"></h3>
+        <input id="modal-input-1" placeholder="">
+        <input id="modal-input-2" placeholder="">
+        <input id="modal-input-3" placeholder="">
+        <input id="modal-input-4" placeholder="">
+        <div style="margin-top: 10px; display: flex; gap: 10px; justify-content: flex-end;">
+          <button onclick="confirmarModal()">Salvar</button>
+          <button onclick="fecharModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
 
     <!-- VOLTAR -->
     <div class="accordion">

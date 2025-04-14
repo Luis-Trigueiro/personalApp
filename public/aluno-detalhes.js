@@ -79,40 +79,39 @@ async function carregarTreinos() {
       const exercicios = Array.isArray(t.exercises)
         ? `<ul class="exercicios">` +
         t.exercises.map((e, idx) => `
-      <li class="exercicio-item">
-        <span><strong>${e.nome}</strong> – ${e.series}x${e.repeticoes} com ${e.carga}kg</span>
-        <div class="exercise-actions">
-          <button class="mini-btn" onclick="editarExercicio('${id}', ${idx})">✏️</button>
-          <button class="mini-btn danger" onclick="removerExercicio('${id}', ${idx})">🗑️</button>
-        </div>
-        <div id="form-edit-${id}-${idx}" class="form-edit-exercicio" style="display:none;"></div>
-      </li>
-    `).join("") + `</ul>`
+            <li class="exercicio-item">
+              <span><strong>${e.nome}</strong> – ${e.series}x${e.repeticoes} com ${e.carga}kg</span>
+              <div class="exercise-actions">
+                <button class="mini-btn" onclick="editarExercicio('${id}', ${idx})">✏️</button>
+                <button class="mini-btn danger" onclick="removerExercicio('${id}', ${idx})">🗑️</button>
+              </div>
+            </li>
+          `).join("") + `</ul>`
         : "";
 
       const data = t.createdAt?.toDate?.().toLocaleDateString("pt-BR") || "";
 
       li.innerHTML = `
-  <div class="treino-header">
-    <div>
-      <strong>${t.title}</strong><br>
-      <span>${t.description || ""}</span>
-    </div>
-    <div class="exercise-actions">
-      <button onclick="abrirEdicaoTreino('${id}')">✏️</button>
-    </div>
-  </div>
-  <div id="form-edicao-treino-${id}"></div>
-  ${exercicios}
-  <button class="mini-btn add-ex-btn" onclick="abrirFormAdicionarExercicio('${id}')">➕ Adicionar Exercício</button>
-  <div id="form-add-ex-${id}"></div>
-  <div class="botoes-treino">
-    <button onclick="removerTreino('${id}')">🗑️ Remover Treino</button>
-  </div>
-  <div style="font-size: 0.85rem; color: #555; margin-top: 4px;">
-    Criado em: ${data}
-  </div>
-`;
+      <div class="treino-header">
+        <div>
+          <strong>${t.title}</strong><br>
+          <span>${t.description || ""}</span>
+        </div>
+        <div class="exercise-actions">
+          <button onclick="abrirEdicaoTreino('${id}')">✏️</button>
+        </div>
+      </div>
+      <div id="form-edicao-treino-${id}"></div>
+      ${exercicios}
+      <button class="mini-btn add-ex-btn" onclick="abrirFormAdicionarExercicio('${id}')">➕ Adicionar Exercício</button>
+      <div id="form-add-ex-${id}"></div>
+      <div class="botoes-treino">
+        <button onclick="removerTreino('${id}')">🗑️ Remover Treino</button>
+      </div>
+      <div style="font-size: 0.85rem; color: #555; margin-top: 4px;">
+        Criado em: ${data}
+      </div>
+    `;
 
 
       list.appendChild(li);
@@ -120,16 +119,66 @@ async function carregarTreinos() {
   });
 }
 
+window.abrirFormAdicionarExercicio = function (treinoId) {
+  const container = document.getElementById(`form-add-ex-${treinoId}`);
+  container.innerHTML = `
+    <div class="form-edit-exercicio">
+      <input id="new-nome-${treinoId}" placeholder="Nome">
+      <input id="new-reps-${treinoId}" placeholder="Repetições">
+      <input id="new-sets-${treinoId}" placeholder="Séries">
+      <input id="new-carga-${treinoId}" placeholder="Carga (kg)">
+      <div style="display:flex; gap:8px; margin-top:6px;">
+        <button onclick="salvarNovoExercicio('${treinoId}')">💾 Salvar</button>
+        <button onclick="cancelarNovoExercicio('${treinoId}')">❌ Cancelar</button>
+      </div>
+    </div>
+  `;
+};
+
+window.salvarNovoExercicio = async function (treinoId) {
+  const nome = document.getElementById(`new-nome-${treinoId}`).value.trim();
+  const reps = parseInt(document.getElementById(`new-reps-${treinoId}`).value);
+  const sets = parseInt(document.getElementById(`new-sets-${treinoId}`).value);
+  const carga = parseFloat(document.getElementById(`new-carga-${treinoId}`).value);
+
+  if (!nome || isNaN(reps) || isNaN(sets) || isNaN(carga)) {
+    alert("Preencha corretamente todos os campos do exercício.");
+    return;
+  }
+
+
+  const treinoRef = doc(db, "trainings", treinoId);
+  const snap = await getDoc(treinoRef);
+  const treino = snap.data();
+
+  treino.exercises.push({ nome, repeticoes: reps, series: sets, carga });
+
+  await setDoc(treinoRef, treino, { merge: true });
+  carregarTreinos();
+};
+
+window.cancelarNovoExercicio = function (treinoId) {
+  document.getElementById(`form-add-ex-${treinoId}`).innerHTML = "";
+};
+
 window.handleAddTraining = async function () {
-  const treinoId = document.getElementById("btn-adicionar-treino").getAttribute("data-id");
+  const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("description").value.trim();
+
+  if (!title || !description || listaExercicios.length === 0) {
+    alert("Preencha o título, a descrição e adicione pelo menos 1 exercício.");
+    return;
+  }
 
   const treinoData = {
     userId: alunoId,
-    title: document.getElementById("title").value,
-    description: document.getElementById("description").value,
+    title,
+    description,
     exercises: listaExercicios,
     createdAt: new Date()
   };
+
+  const treinoId = document.getElementById("btn-adicionar-treino").getAttribute("data-id");
 
   if (treinoId) {
     await setDoc(doc(db, "trainings", treinoId), treinoData, { merge: true });
@@ -142,11 +191,11 @@ window.handleAddTraining = async function () {
   location.reload();
 };
 
+
 window.abrirEdicaoTreino = function (treinoId) {
   const t = treinosCache[treinoId];
   const container = document.getElementById(`form-edicao-treino-${treinoId}`);
 
-  // Remove outras edições abertas
   document.querySelectorAll(".form-edit-treino").forEach(f => f.remove());
 
   const form = document.createElement("div");
@@ -154,7 +203,7 @@ window.abrirEdicaoTreino = function (treinoId) {
   form.innerHTML = `
     <input id="edit-title-${treinoId}" value="${t.title}" placeholder="Título do treino">
     <input id="edit-desc-${treinoId}" value="${t.description || ''}" placeholder="Descrição do treino">
-    <div style="display:flex; gap:8px; margin-top:6px;">
+    <div class="botoes-inline">
       <button onclick="salvarEdicaoTreino('${treinoId}')">💾 Salvar</button>
       <button onclick="cancelarEdicaoTreino('${treinoId}')">❌ Cancelar</button>
     </div>
@@ -179,19 +228,6 @@ window.cancelarEdicaoTreino = function (treinoId) {
   if (container) container.innerHTML = "";
 };
 
-
-window.editarTreino = function (treinoId) {
-  const treino = treinosCache[treinoId];
-  document.getElementById("title").value = treino.title;
-  document.getElementById("description").value = treino.description;
-  document.getElementById("btn-adicionar-treino").innerText = "Salvar Edição";
-  document.getElementById("btn-adicionar-treino").setAttribute("data-id", treinoId);
-  listaExercicios.length = 0;
-  if (Array.isArray(treino.exercises)) {
-    listaExercicios.push(...treino.exercises);
-  }
-};
-
 window.removerTreino = async function (treinoId) {
   if (confirm("Tem certeza que deseja remover este treino?")) {
     await deleteDoc(doc(db, "trainings", treinoId));
@@ -201,73 +237,37 @@ window.removerTreino = async function (treinoId) {
 
 window.editarExercicio = function (treinoId, index) {
   const treino = treinosCache[treinoId];
-  const exercicio = treino.exercises[index];
-  const li = document.querySelectorAll(`#trainings-list .exercicio-item`)[index];
+  const e = treino.exercises[index];
 
-  // Cria o formulário de edição
-  const formDiv = document.createElement("div");
-  formDiv.className = "form-edit-exercicio";
-  formDiv.innerHTML = `
-    <input id="edit-nome-${treinoId}-${index}" value="${exercicio.nome}" placeholder="Nome">
-    <input id="edit-reps-${treinoId}-${index}" value="${exercicio.repeticoes}" placeholder="Repetições">
-    <input id="edit-sets-${treinoId}-${index}" value="${exercicio.series}" placeholder="Séries">
-    <input id="edit-carga-${treinoId}-${index}" value="${exercicio.carga}" placeholder="Carga (kg)">
-    <div style="display:flex; gap:8px; margin-top:6px;">
-      <button onclick="salvarExercicio('${treinoId}', ${index})">💾 Salvar</button>
-      <button onclick="cancelarEdicaoExercicio(this)">❌ Cancelar</button>
-    </div>
-  `;
-
-  // Remove qualquer formulário de edição anterior
-  document.querySelectorAll(".form-edit-exercicio").forEach(el => el.remove());
-
-  // Adiciona o formulário logo abaixo do exercício
-  li.appendChild(formDiv);
+  abrirModal({
+    titulo: "Editar Exercício",
+    campos: ["Nome", "Repetições", "Séries", "Carga (kg)"],
+    valores: [e.nome, e.repeticoes, e.series, e.carga],
+    onConfirmar: async ([nome, rep, sets, carga]) => {
+      treino.exercises[index] = {
+        nome,
+        repeticoes: parseInt(rep),
+        series: parseInt(sets),
+        carga: parseFloat(carga)
+      };
+      await setDoc(doc(db, "trainings", treinoId), treino, { merge: true });
+      carregarTreinos();
+    }
+  });
 };
-
-window.abrirFormAdicionarExercicio = function (treinoId) {
-  const container = document.getElementById(`form-add-ex-${treinoId}`);
-  container.innerHTML = `
-    <div class="form-edit-exercicio">
-      <input id="new-nome-${treinoId}" placeholder="Nome">
-      <input id="new-reps-${treinoId}" placeholder="Repetições">
-      <input id="new-sets-${treinoId}" placeholder="Séries">
-      <input id="new-carga-${treinoId}" placeholder="Carga (kg)">
-      <div style="display:flex; gap:8px; margin-top:6px;">
-        <button onclick="salvarNovoExercicio('${treinoId}')">💾 Salvar</button>
-        <button onclick="cancelarNovoExercicio('${treinoId}')">❌ Cancelar</button>
-      </div>
-    </div>
-  `;
-};
-
-window.salvarNovoExercicio = async function (treinoId) {
-  const nome = document.getElementById(`new-nome-${treinoId}`).value;
-  const reps = parseInt(document.getElementById(`new-reps-${treinoId}`).value);
-  const sets = parseInt(document.getElementById(`new-sets-${treinoId}`).value);
-  const carga = parseFloat(document.getElementById(`new-carga-${treinoId}`).value);
-
-  const treinoRef = doc(db, "trainings", treinoId);
-  const snap = await getDoc(treinoRef);
-  const treino = snap.data();
-
-  treino.exercises.push({ nome, repeticoes: reps, series: sets, carga });
-
-  await setDoc(treinoRef, treino, { merge: true });
-  carregarTreinos();
-};
-
-window.cancelarNovoExercicio = function (treinoId) {
-  document.getElementById(`form-add-ex-${treinoId}`).innerHTML = "";
-};
-
 
 
 window.salvarExercicio = async function (treinoId, index) {
-  const nome = document.getElementById(`edit-nome-${treinoId}-${index}`).value;
+  const nome = document.getElementById(`edit-nome-${treinoId}-${index}`).value.trim();
   const reps = parseInt(document.getElementById(`edit-reps-${treinoId}-${index}`).value);
   const sets = parseInt(document.getElementById(`edit-sets-${treinoId}-${index}`).value);
   const carga = parseFloat(document.getElementById(`edit-carga-${treinoId}-${index}`).value);
+
+  if (!nome || isNaN(reps) || isNaN(sets) || isNaN(carga)) {
+    alert("Preencha corretamente todos os campos do exercício.");
+    return;
+  }
+
 
   const treinoRef = doc(db, "trainings", treinoId);
   const treinoSnap = await getDoc(treinoRef);
@@ -283,7 +283,6 @@ window.cancelarEdicaoExercicio = function (btn) {
   const formDiv = btn.closest(".form-edit-exercicio");
   if (formDiv) formDiv.remove();
 };
-
 
 window.removerExercicio = async function (treinoId, index) {
   if (!confirm("Deseja remover este exercício?")) return;
@@ -312,45 +311,92 @@ async function carregarAvaliacoes() {
       avaliacoesCache[id] = e;
       const data = e.createdAt?.toDate().toLocaleDateString("pt-BR");
       const li = document.createElement("li");
+      li.classList.add("avaliacao-item");
       li.innerHTML = `
-        ${e.peso}kg - ${e.gordura}% (${data})<br>
-        <button onclick="editarAvaliacao('${id}')">✏️ Editar</button>
-        <button onclick="removerAvaliacao('${id}')">🗑️ Remover</button>
+        <div><strong>${e.peso}kg</strong> – ${e.gordura}% (${data})</div>
+        <div class="exercise-actions">
+          <button onclick="editarAvaliacao('${id}')">✏️</button>
+          <button onclick="removerAvaliacao('${id}')">🗑️</button>
+        </div>
+        <div id="form-edit-avaliacao-${id}" class="form-edit-avaliacao" style="display:none;"></div>
       `;
       list.appendChild(li);
     }
   });
 }
 
-window.handleAddEvaluation = async function () {
-  const id = document.getElementById("btn-adicionar-avaliacao")?.getAttribute("data-id");
-  const dados = {
-    userId: alunoId,
-    peso: document.getElementById("peso").value,
-    gordura: document.getElementById("gordura").value,
-    createdAt: Timestamp.now()
-  };
 
-  if (id) {
-    await setDoc(doc(db, "evaluations", id), dados, { merge: true });
-    document.getElementById("btn-adicionar-avaliacao").removeAttribute("data-id");
-    document.getElementById("btn-adicionar-avaliacao").innerText = "Adicionar";
-  } else {
-    await addDoc(collection(db, "evaluations"), dados);
+window.editarAvaliacao = function (id) {
+  const a = avaliacoesCache[id];
+
+  abrirModal({
+    titulo: "Editar Avaliação",
+    campos: ["Peso (kg)", "% Gordura"],
+    valores: [a.peso, a.gordura],
+    onConfirmar: async ([peso, gordura]) => {
+      await setDoc(doc(db, "evaluations", id), {
+        peso,
+        gordura
+      }, { merge: true });
+      carregarAvaliacoes();
+    }
+  });
+};
+
+
+
+window.salvarAvaliacao = async function (id) {
+  const peso = document.getElementById(`edit-peso-${id}`).value.trim();
+  const gordura = document.getElementById(`edit-gordura-${id}`).value.trim();
+
+  if (!peso || !gordura) {
+    alert("Preencha todos os campos da avaliação.");
+    return;
   }
 
-  document.getElementById("peso").value = "";
-  document.getElementById("gordura").value = "";
+  await setDoc(doc(db, "evaluations", id), {
+    peso,
+    gordura
+  }, { merge: true });
+
   carregarAvaliacoes();
 };
 
-window.editarAvaliacao = function (id) {
-  const e = avaliacoesCache[id];
-  document.getElementById("peso").value = e.peso;
-  document.getElementById("gordura").value = e.gordura;
-  document.getElementById("btn-adicionar-avaliacao").innerText = "Salvar Edição";
-  document.getElementById("btn-adicionar-avaliacao").setAttribute("data-id", id);
+
+window.cancelarEdicaoAvaliacao = function () {
+  document.querySelectorAll(".form-edit-avaliacao").forEach(f => f.style.display = "none");
+  document.getElementById("peso").value = "";
+  document.getElementById("gordura").value = "";
+  const btn = document.getElementById("btn-adicionar-avaliacao");
+  btn.innerText = "Adicionar";
+  btn.removeAttribute("data-id");
 };
+
+
+window.handleAddEvaluation = async function () {
+  const peso = document.getElementById("peso").value.trim();
+  const gordura = document.getElementById("gordura").value.trim();
+
+  if (!peso || !gordura) {
+    alert("Preencha todos os campos da avaliação.");
+    return;
+  }
+
+  const dados = {
+    userId: alunoId,
+    peso,
+    gordura,
+    createdAt: Timestamp.now()
+  };
+
+  await addDoc(collection(db, "evaluations"), dados);
+
+  document.getElementById("peso").value = "";
+  document.getElementById("gordura").value = "";
+
+  carregarAvaliacoes();
+};
+
 
 window.removerAvaliacao = async function (id) {
   if (confirm("Deseja remover esta avaliação?")) {
@@ -358,6 +404,69 @@ window.removerAvaliacao = async function (id) {
     carregarAvaliacoes();
   }
 };
+
+window.abrirPopup = function (html) {
+  const modal = document.getElementById("popup-modal");
+  const body = document.getElementById("modal-body");
+  body.innerHTML = html;
+  modal.style.display = "flex";
+};
+
+window.fecharPopup = function () {
+  document.getElementById("popup-modal").style.display = "none";
+};
+
+// Fechar ao clicar no X
+document.getElementById("modal-close").onclick = fecharPopup;
+
+// Fechar ao clicar fora do conteúdo
+document.getElementById("popup-modal").onclick = function (e) {
+  if (e.target.id === "popup-modal") fecharPopup();
+};
+
+let modalContext = {};
+
+window.abrirModal = function ({ titulo, campos, valores, onConfirmar }) {
+  document.getElementById("modal-title").innerText = titulo;
+  modalContext.onConfirmar = onConfirmar;
+
+  for (let i = 0; i < 4; i++) {
+    const input = document.getElementById(`modal-input-${i + 1}`);
+    if (campos[i]) {
+      input.placeholder = campos[i];
+      input.value = valores[i] || '';
+      input.style.display = 'block';
+    } else {
+      input.style.display = 'none';
+    }
+  }
+
+  document.getElementById("modal-overlay").style.display = "flex";
+}
+
+window.fecharModal = function () {
+  document.getElementById("modal-overlay").style.display = "none";
+  modalContext = {};
+}
+
+window.confirmarModal = function () {
+  const valores = [];
+  for (let i = 0; i < 4; i++) {
+    const input = document.getElementById(`modal-input-${i + 1}`);
+    if (input.style.display !== 'none' && !input.value.trim()) {
+      alert("Preencha todos os campos.");
+      return;
+    }
+    valores.push(input.value.trim());
+  }
+
+  if (modalContext.onConfirmar) {
+    modalContext.onConfirmar(valores);
+    fecharModal();
+  }
+}
+
+
 
 // Inicialização
 carregarAluno();
