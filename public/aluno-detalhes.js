@@ -1,16 +1,17 @@
-import { db } from "./firebase.js";
 import {
+  addDoc,
+  collection,
+  deleteDoc,
   doc,
   getDoc,
-  collection,
   getDocs,
-  addDoc,
-  Timestamp,
-  query,
   orderBy,
+  query,
   setDoc,
-  deleteDoc
+  Timestamp
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { db } from "./firebase.js";
+
 
 const listaExercicios = [];
 const previewList = document.getElementById("exercise-preview-list");
@@ -107,6 +108,7 @@ async function carregarTreinos() {
       <div id="form-add-ex-${id}"></div>
       <div class="botoes-treino">
         <button onclick="removerTreino('${id}')">🗑️ Remover Treino</button>
+        <button onclick="exportarTreinoPDF('${id}')">📄 Exportar PDF</button>
       </div>
       <div style="font-size: 0.85rem; color: #555; margin-top: 4px;">
         Criado em: ${data}
@@ -123,7 +125,71 @@ window.abrirFormAdicionarExercicio = function (treinoId) {
   const container = document.getElementById(`form-add-ex-${treinoId}`);
   container.innerHTML = `
     <div class="form-edit-exercicio">
-      <input id="new-nome-${treinoId}" placeholder="Nome">
+      <input id="new-nome-${treinoId}" list="lista-exercicios" placeholder="Nome do exercício">
+      <datalist id="lista-exercicios">
+            <!-- Peito -->
+            <option value="Supino Reto com Barra">
+            <option value="Supino Inclinado com Halteres">
+            <option value="Crucifixo no Banco Reto">
+            <option value="Crossover no Cabo">
+            <option value="Flexão de Braço">
+
+              <!-- Costas -->
+            <option value="Puxada na Frente na Barra Guiada">
+            <option value="Remada Curvada com Barra">
+            <option value="Remada Baixa no Cabo">
+            <option value="Puxada na Barra Fixa">
+            <option value="Pullover no Cabo">
+
+              <!-- Pernas -->
+            <option value="Agachamento Livre">
+            <option value="Leg Press 45°">
+            <option value="Cadeira Extensora">
+            <option value="Mesa Flexora">
+            <option value="Cadeira Abdutora">
+            <option value="Avanço com Halteres">
+            <option value="Stiff com Halteres">
+            <option value="Panturrilha em Pé">
+            <option value="Panturrilha Sentado">
+            <option value="Agachamento Búlgaro">
+
+              <!-- Ombros -->
+            <option value="Desenvolvimento com Halteres">
+            <option value="Elevação Lateral">
+            <option value="Elevação Frontal">
+            <option value="Remada Alta com Barra">
+            <option value="Crucifixo Inverso no Peck Deck">
+
+              <!-- Bíceps -->
+            <option value="Rosca Direta com Barra">
+            <option value="Rosca Alternada com Halteres">
+            <option value="Rosca Concentrada">
+            <option value="Rosca Scott na Máquina">
+            <option value="Rosca Martelo">
+
+              <!-- Tríceps -->
+            <option value="Tríceps Pulley com Barra">
+            <option value="Tríceps Testa com Barra">
+            <option value="Tríceps Francês com Halteres">
+            <option value="Tríceps Coice">
+            <option value="Mergulho entre Bancos">
+
+              <!-- Abdômen -->
+            <option value="Abdominal Supra no Solo">
+            <option value="Prancha Isométrica">
+            <option value="Abdominal Infra com Elevação de Pernas">
+            <option value="Abdominal na Corda">
+            <option value="Abdominal Lateral com Peso">
+
+              <!-- Cardio / Funcionais -->
+            <option value="Esteira">
+            <option value="Bicicleta Ergométrica">
+            <option value="Elíptico">
+            <option value="Pular Corda">
+            <option value="Burpee">
+            <option value="Escalador">
+            <option value="Polichinelo">
+          </datalist>
       <input id="new-reps-${treinoId}" placeholder="Repetições">
       <input id="new-sets-${treinoId}" placeholder="Séries">
       <input id="new-carga-${treinoId}" placeholder="Carga (kg)">
@@ -188,7 +254,22 @@ window.handleAddTraining = async function () {
     await addDoc(collection(db, "trainings"), treinoData);
   }
 
-  location.reload();
+  const campos = [
+    "exercise-sets", "exercise-reps", "exercise-weight", "exercise-name", "title", "description", "exercise-preview-list"
+  ];
+
+  campos.forEach(id => document.getElementById(id).value = "");
+
+  document.querySelectorAll('#exercise-preview-list').forEach(item => item.textContent = "");
+  document.querySelectorAll('#exercise-preview').forEach(item => item.textContent = "");
+
+  const preview = document.querySelectorAll('#exercise-preview-list li');
+  preview.forEach(item => {
+    item.textContent = ""
+  });
+
+
+  carregarTreinos();
 };
 
 
@@ -309,40 +390,116 @@ async function carregarAvaliacoes() {
 
     if (e.userId === alunoId) {
       avaliacoesCache[id] = e;
-      const data = e.createdAt?.toDate().toLocaleDateString("pt-BR");
+      const data = e.dataAvaliacao
+        ? new Date(e.dataAvaliacao).toLocaleDateString("pt-BR")
+        : e.createdAt?.toDate().toLocaleDateString("pt-BR");
+
       const li = document.createElement("li");
       li.classList.add("avaliacao-item");
+
       li.innerHTML = `
-        <div><strong>${e.peso}kg</strong> – ${e.gordura}% (${data})</div>
-        <div class="exercise-actions">
-          <button onclick="editarAvaliacao('${id}')">✏️</button>
-          <button onclick="removerAvaliacao('${id}')">🗑️</button>
-        </div>
-        <div id="form-edit-avaliacao-${id}" class="form-edit-avaliacao" style="display:none;"></div>
-      `;
+  <div class="avaliacao-bloco">
+    <div class="peso-gordura">
+      <strong>${e.peso}kg</strong> – ${e.gordura}%<br>
+      <span class="data-avaliacao">📅 ${data}</span>
+    </div>
+    <div class="dados-completos">
+      Altura: ${e.altura || "-"}m<br>
+      Massa Muscular: ${e.massaMuscular || "-"}kg<br>
+      <strong>Medidas:</strong><br>
+      Peitoral: ${e.peitoral || "-"}cm, Cintura: ${e.cintura || "-"}cm, Quadril: ${e.quadril || "-"}cm<br>
+      Braço: ${e.braco || "-"}cm, Coxa: ${e.coxa || "-"}cm, Panturrilha: ${e.panturrilha || "-"}cm<br>
+      <strong>FC:</strong> ${e.frequenciaCardiaca || "-"} bpm, <strong>PA:</strong> ${e.pressaoArterial || "-"}<br>
+      <strong>Flexibilidade:</strong> ${e.flexibilidade || "-"}cm<br>
+      <strong>Condicionamento:</strong> ${e.condicionamento || "-"}<br>
+      <strong>Objetivo:</strong> ${e.objetivoAtual || "-"}<br>
+      <strong>Obs:</strong> ${e.observacoes || "-"}
+    </div>
+    <div class="evaluation-actions">
+      <button onclick="editarAvaliacao('${id}')">✏️</button>
+      <button onclick="removerAvaliacao('${id}')">🗑️</button>
+      <button onclick="exportarAvaliacaoPDF('${id}')">📄</button>
+    </div>
+  </div>
+`;
+
       list.appendChild(li);
     }
   });
 }
 
 
-window.editarAvaliacao = function (id) {
-  const a = avaliacoesCache[id];
 
-  abrirModal({
-    titulo: "Editar Avaliação",
-    campos: ["Peso (kg)", "% Gordura"],
-    valores: [a.peso, a.gordura],
-    onConfirmar: async ([peso, gordura]) => {
-      await setDoc(doc(db, "evaluations", id), {
-        peso,
-        gordura
-      }, { merge: true });
-      carregarAvaliacoes();
-    }
-  });
+window.editarAvaliacao = function (id) {
+  const e = avaliacoesCache[id];
+
+  const html = `
+    <h3 id="modal-title">Editar Avaliação</h3>
+    <input id="edit-peso" placeholder="Peso (kg)" value="${e.peso || ''}" />
+    <input id="edit-altura" placeholder="Altura (m)" value="${e.altura || ''}" />
+    <input id="edit-gordura" placeholder="% Gordura" value="${e.gordura || ''}" />
+    <input id="edit-massaMuscular" placeholder="Massa Muscular (kg)" value="${e.massaMuscular || ''}" />
+
+    <h4>📏 Medidas</h4>
+    <input id="edit-peitoral" placeholder="Peitoral (cm)" value="${e.peitoral || ''}" />
+    <input id="edit-cintura" placeholder="Cintura (cm)" value="${e.cintura || ''}" />
+    <input id="edit-quadril" placeholder="Quadril (cm)" value="${e.quadril || ''}" />
+    <input id="edit-braco" placeholder="Braço (cm)" value="${e.braco || ''}" />
+    <input id="edit-coxa" placeholder="Coxa (cm)" value="${e.coxa || ''}" />
+    <input id="edit-panturrilha" placeholder="Panturrilha (cm)" value="${e.panturrilha || ''}" />
+
+    <h4>❤️ Parâmetros Vitais</h4>
+    <input id="edit-frequenciaCardiaca" placeholder="Frequência Cardíaca" value="${e.frequenciaCardiaca || ''}" />
+    <input id="edit-pressaoArterial" placeholder="Pressão Arterial" value="${e.pressaoArterial || ''}" />
+    <input id="edit-flexibilidade" placeholder="Flexibilidade (cm)" value="${e.flexibilidade || ''}" />
+
+    <input id="edit-condicionamento" placeholder="Nível de Condicionamento" value="${e.condicionamento || ''}" />
+    <input id="edit-objetivoAtual" placeholder="Objetivo Atual" value="${e.objetivoAtual || ''}" />
+    <input id="edit-dataAvaliacao" type="date" value="${e.dataAvaliacao || ''}" />
+    <textarea id="edit-observacoes" placeholder="Observações">${e.observacoes || ''}</textarea>
+
+    <div class="modal-buttons" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+      <button onclick="salvarAvaliacaoEditada('${id}')">💾 Salvar</button>
+      <button onclick="fecharPopup()">❌ Cancelar</button>
+    </div>
+  `;
+
+  abrirPopup(html);
 };
 
+window.salvarAvaliacaoEditada = async function (id) {
+  const get = (id) => document.getElementById(id)?.value.trim() || "";
+
+  const dados = {
+    peso: get("edit-peso"),
+    altura: get("edit-altura"),
+    gordura: get("edit-gordura"),
+    massaMuscular: get("edit-massaMuscular"),
+    peitoral: get("edit-peitoral"),
+    cintura: get("edit-cintura"),
+    quadril: get("edit-quadril"),
+    braco: get("edit-braco"),
+    coxa: get("edit-coxa"),
+    panturrilha: get("edit-panturrilha"),
+    frequenciaCardiaca: get("edit-frequenciaCardiaca"),
+    pressaoArterial: get("edit-pressaoArterial"),
+    flexibilidade: get("edit-flexibilidade"),
+    condicionamento: get("edit-condicionamento"),
+    objetivoAtual: get("edit-objetivoAtual"),
+    dataAvaliacao: get("edit-dataAvaliacao"),
+    observacoes: get("edit-observacoes")
+  };
+
+  // validação mínima
+  if (!dados.peso || !dados.gordura || !dados.altura || !dados.dataAvaliacao) {
+    alert("Preencha peso, altura, gordura e data.");
+    return;
+  }
+
+  await setDoc(doc(db, "evaluations", id), dados, { merge: true });
+  fecharPopup();
+  carregarAvaliacoes();
+};
 
 
 window.salvarAvaliacao = async function (id) {
@@ -365,37 +522,88 @@ window.salvarAvaliacao = async function (id) {
 
 window.cancelarEdicaoAvaliacao = function () {
   document.querySelectorAll(".form-edit-avaliacao").forEach(f => f.style.display = "none");
-  document.getElementById("peso").value = "";
-  document.getElementById("gordura").value = "";
+
+  // limpeza dos campos
+  const campos = [
+    "peso", "altura", "gordura", "massaMuscular", "peitoral", "cintura", "quadril",
+    "braco", "coxa", "panturrilha", "frequenciaCardiaca", "pressaoArterial",
+    "flexibilidade", "condicionamento", "objetivoAtual", "dataAvaliacao", "observacoes"
+  ];
+  campos.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+
+  // só manipula o botão se ele existir
   const btn = document.getElementById("btn-adicionar-avaliacao");
-  btn.innerText = "Adicionar";
-  btn.removeAttribute("data-id");
+  if (btn) {
+    btn.innerText = "Adicionar";
+    btn.removeAttribute("data-id");
+  }
 };
+
 
 
 window.handleAddEvaluation = async function () {
   const peso = document.getElementById("peso").value.trim();
+  const altura = document.getElementById("altura").value.trim();
   const gordura = document.getElementById("gordura").value.trim();
+  const massaMuscular = document.getElementById("massaMuscular").value.trim();
+  const peitoral = document.getElementById("peitoral").value.trim();
+  const cintura = document.getElementById("cintura").value.trim();
+  const quadril = document.getElementById("quadril").value.trim();
+  const braco = document.getElementById("braco").value.trim();
+  const coxa = document.getElementById("coxa").value.trim();
+  const panturrilha = document.getElementById("panturrilha").value.trim();
+  const frequenciaCardiaca = document.getElementById("frequenciaCardiaca").value.trim();
+  const pressaoArterial = document.getElementById("pressaoArterial").value.trim();
+  const flexibilidade = document.getElementById("flexibilidade").value.trim();
+  const condicionamento = document.getElementById("condicionamento").value.trim();
+  const objetivoAtual = document.getElementById("objetivoAtual").value.trim();
+  const dataAvaliacao = document.getElementById("dataAvaliacao").value;
+  const observacoes = document.getElementById("observacoes").value.trim();
 
-  if (!peso || !gordura) {
-    alert("Preencha todos os campos da avaliação.");
+  // Validação de campos obrigatórios
+  if (!peso || !altura || !dataAvaliacao) {
+    alert("Por favor, preencha peso, altura, gordura corporal e data da avaliação.");
     return;
   }
 
   const dados = {
     userId: alunoId,
     peso,
+    altura,
     gordura,
+    massaMuscular,
+    peitoral,
+    cintura,
+    quadril,
+    braco,
+    coxa,
+    panturrilha,
+    frequenciaCardiaca,
+    pressaoArterial,
+    flexibilidade,
+    condicionamento,
+    objetivoAtual,
+    dataAvaliacao,
+    observacoes,
     createdAt: Timestamp.now()
   };
 
   await addDoc(collection(db, "evaluations"), dados);
 
-  document.getElementById("peso").value = "";
-  document.getElementById("gordura").value = "";
+  // Limpar os campos após salvar
+  const campos = [
+    "peso", "altura", "gordura", "massaMuscular", "peitoral", "cintura", "quadril",
+    "braco", "coxa", "panturrilha", "frequenciaCardiaca", "pressaoArterial", "flexibilidade",
+    "condicionamento", "objetivoAtual", "dataAvaliacao", "observacoes"
+  ];
+  campos.forEach(id => document.getElementById(id).value = "");
 
   carregarAvaliacoes();
 };
+
 
 
 window.removerAvaliacao = async function (id) {
@@ -465,6 +673,256 @@ window.confirmarModal = function () {
     fecharModal();
   }
 }
+
+
+window.gerarPDFTreinos = async function () {
+  const { jsPDF } = window.jspdf;
+  const document = new jsPDF();
+  let y = 20;
+
+  document.setFont("helvetica", "bold");
+  document.setFontSize(16);
+
+  const snap = await getDoc(doc(db, "users", alunoId));
+  const d = snap.data();
+  document.text(`Treinos do Aluno: ${d.nome}`, 15, y);
+  y += 10;
+
+  for (const [id, treino] of Object.entries(treinosCache)) {
+    const data = treino.createdAt?.toDate?.().toLocaleDateString("pt-BR") || "";
+    const titulo = treino.title || "Sem título";
+    const desc = treino.description || "";
+
+    // Título e descrição do treino
+    document.setFont("helvetica", "bold");
+    document.setFontSize(13);
+    document.text(`${titulo} – ${desc}`, 15, y);
+    y += 7;
+
+    document.setFont("helvetica", "normal");
+    document.setFontSize(12);
+
+    for (const ex of treino.exercises || []) {
+      const nome = ex.nome || "";
+      const series = ex.series || "";
+      const reps = ex.repeticoes || "";
+      const carga = ex.carga || "";
+      document.text(`• ${nome}: ${series}x${reps} com ${carga}kg`, 18, y);
+      y += 6;
+    }
+
+    y += 8;
+
+    if (y > 270) {
+      document.addPage();
+      y = 20;
+    }
+  }
+
+  await salvarPDFMobile(document, "treinos.pdf");
+
+};
+
+
+window.gerarPDFAvaliacoes = async function () {
+  const { jsPDF } = window.jspdf;
+  const document = new jsPDF();
+  let y = 15;
+
+  document.setFont("helvetica", "bold");
+  document.setFontSize(18);
+
+  const snap = await getDoc(doc(db, "users", alunoId));
+  const d = snap.data();
+  document.text(`Avaliações do Aluno: ${d.nome}`, 105, y, { align: "center" });
+
+  y += 10;
+
+  for (const [id, a] of Object.entries(avaliacoesCache)) {
+    const data = a.dataAvaliacao || new Date().toLocaleDateString("pt-BR");
+
+    document.setDrawColor(0);
+    document.setFillColor(230, 230, 230); // cinza claro
+    document.roundedRect(10, y - 2, 190, 8, 2, 2, 'F');
+
+    document.setFontSize(12);
+    document.setTextColor(0, 0, 0);
+    document.text(`${data}`, 12, y + 4);
+    y += 10;
+
+    const campos = [
+      ["Peso", a.peso],
+      ["Altura", a.altura],
+      ["Gordura", a.gordura],
+      ["Massa Muscular", a.massaMuscular],
+      ["Peitoral", a.peitoral],
+      ["Cintura", a.cintura],
+      ["Quadril", a.quadril],
+      ["Braço", a.braco],
+      ["Coxa", a.coxa],
+      ["Panturrilha", a.panturrilha],
+      ["FC", a.frequenciaCardiaca],
+      ["PA", a.pressaoArterial],
+      ["Flexibilidade", a.flexibilidade],
+      ["Condicionamento", a.condicionamento],
+      ["Objetivo", a.objetivoAtual],
+      ["Observações", a.observacoes],
+    ];
+
+    document.setFont("helvetica", "normal");
+    campos.forEach(([label, valor]) => {
+      if (valor) {
+        document.text(`${label}:`, 15, y);
+        document.text(`${valor}`, 55, y);
+        y += 7;
+      }
+    });
+
+    y += 5;
+
+    if (y > 270) {
+      document.addPage();
+      y = 15;
+    }
+  }
+
+  await salvarPDFMobile(document, "avaliacoes.pdf");
+
+};
+
+window.exportarTreinoPDF = async function (id) {
+  const { jsPDF } = window.jspdf;
+  const treino = treinosCache[id];
+  const doc = new jsPDF();
+  let y = 20;
+
+  doc.setFontSize(16);
+  doc.text(`Treino: ${treino.title}`, 15, y);
+  y += 8;
+  if (treino.description) {
+    doc.setFontSize(12);
+    doc.text(`Descrição: ${treino.description}`, 15, y);
+    y += 10;
+  }
+
+  treino.exercises.forEach(e => {
+    doc.text(`• ${e.nome}: ${e.series}x${e.repeticoes} com ${e.carga}kg`, 15, y);
+    y += 8;
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+  });
+
+  await salvarPDFMobile(doc, `treino-${treino.title}.pdf`);
+};
+
+window.exportarAvaliacaoPDF = async function (id) {
+  const { jsPDF } = window.jspdf;
+  const a = avaliacoesCache[id];
+  const doc = new jsPDF();
+  let y = 20;
+
+  doc.setFontSize(16);
+  doc.text("Avaliação Física", 15, y);
+  y += 10;
+
+  const campos = [
+    ["Data", a.dataAvaliacao || ""],
+    ["Peso", a.peso],
+    ["Altura", a.altura],
+    ["% Gordura", a.gordura],
+    ["Massa Muscular", a.massaMuscular],
+    ["Peitoral", a.peitoral],
+    ["Cintura", a.cintura],
+    ["Quadril", a.quadril],
+    ["Braço", a.braco],
+    ["Coxa", a.coxa],
+    ["Panturrilha", a.panturrilha],
+    ["FC", a.frequenciaCardiaca],
+    ["PA", a.pressaoArterial],
+    ["Flexibilidade", a.flexibilidade],
+    ["Condicionamento", a.condicionamento],
+    ["Objetivo", a.objetivoAtual],
+    ["Observações", a.observacoes],
+  ];
+
+  doc.setFontSize(12);
+  campos.forEach(([label, valor]) => {
+    if (valor) {
+      doc.text(`${label}: ${valor}`, 15, y);
+      y += 7;
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+    }
+  });
+
+  await salvarPDFMobile(doc,`avaliacao-${a.dataAvaliacao || "aluno"}.pdf`);
+};
+
+
+async function salvarPDFMobile(doc, nomeArquivo = "documento.pdf") {
+  const pdfBytes = doc.output('arraybuffer');
+
+  // Cria Blob manualmente
+  const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
+
+  // 2. Converte o Blob para base64
+  const base64Data = await blobToBase64(pdfBlob);
+
+  const { Filesystem, Share } = Capacitor.Plugins;
+
+  await Filesystem.writeFile({
+    path: nomeArquivo,
+    data: base64Data,
+    directory: 'DOCUMENTS',
+    recursive: true
+  });
+
+  const fileUri = await Filesystem.getUri({
+    path: nomeArquivo,
+    directory: 'DOCUMENTS'
+  });
+
+  await Share.share({
+    title: nomeArquivo,
+    text: 'Confira o PDF gerado.',
+    url: fileUri.uri,
+    dialogTitle: 'Compartilhar PDF'
+  });
+}
+
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result.split(',')[1]; // remove o prefixo data:application/pdf;base64,
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+
+
+function enviarPorWhatsApp(blob, filename) {
+  const reader = new FileReader();
+  reader.onload = function () {
+    const base64 = reader.result.split(",")[1];
+    const link = `https://api.whatsapp.com/send?text=Aqui está o PDF do aluno:`;
+
+    const a = document.createElement("a");
+    a.href = link;
+    a.target = "_blank";
+    a.click();
+  };
+  reader.readAsDataURL(blob);
+}
+
 
 
 
