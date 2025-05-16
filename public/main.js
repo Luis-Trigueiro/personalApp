@@ -1,5 +1,6 @@
 // importa auth e db já configurados
 import { auth, db } from "./firebase.js";
+import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
 // importa funções específicas da CDN
 import {
@@ -56,6 +57,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const alunosLista = document.getElementById("alunos-lista");
   const searchEmail = document.getElementById("search-email");
   const alunoEncontrado = document.getElementById("aluno-encontrado");
+  let avaliacoesAluno = [];
+  let treinosAluno = [];
+
+
 
   const loading = document.getElementById("loading-screen");
   if (loading) loading.style.display = "flex";
@@ -431,6 +436,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Treinos
       const trainings = await getDocs(query(collection(db, "trainings"), where("userId", "==", user.uid)));
+      treinosAluno = trainings.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
       if (trainingsList) {
         trainingsList.innerHTML = trainings.docs.map(doc => {
           const t = doc.data();
@@ -449,6 +456,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <div style="margin-top:6px;font-size:0.85rem;color:#555;">
               Criado em: ${date}
             </div>
+            <button onclick="exportarTreinoPDF('${doc.id}')">📄 Exportar Treino em PDF</button>
+
           </li>`;
         }).join("");
       }
@@ -459,10 +468,31 @@ document.addEventListener("DOMContentLoaded", () => {
       if (evaluationsList) {
         evaluationsList.innerHTML = evaluations.docs.map(doc => {
           const e = doc.data();
-          const date = e.createdAt?.toDate?.().toLocaleDateString("pt-BR") || "";
-          return `<li>${e.peso}kg - ${e.gordura}%<br><span style="font-size:0.85rem;color:#555;">Registrado em: ${date}</span></li>`;
+          const id = doc.id;
+          const data = e.createdAt?.toDate?.().toLocaleDateString("pt-BR") || "-";
+
+          return `
+            <div class="avaliacao-card">
+              <div><strong>${e.peso || '-'}kg – ${e.gordura || '-'}%</strong></div>
+              <div>Registrado em: ${data}</div>
+              <div style="font-size: 0.9rem; margin-top: 6px;">
+                Altura: ${e.altura || '-'}m<br>
+                Massa Muscular: ${e.massaMuscular || '-'}kg<br>
+                Medidas: Peitoral ${e.peitoral || '-'}cm, Cintura ${e.cintura || '-'}cm, Quadril ${e.quadril || '-'}cm, Braço ${e.braco || '-'}cm, Coxa ${e.coxa || '-'}cm, Panturrilha ${e.panturrilha || '-'}cm<br>
+                FC: ${e.frequenciaCardiaca || '-'} bpm, PA: ${e.pressaoArterial || '-'}, Flexibilidade: ${e.flexibilidade || '-'}cm<br>
+                Condicionamento: ${e.condicionamento || '-'}<br>
+                Objetivo: ${e.objetivoAtual || '-'}<br>
+                Obs: ${e.observacoes || '-'}
+              </div>
+              <button onclick="exportarAvaliacaoPDF('${id}')">📄 Exportar Avaliação em PDF</button>
+            </div>
+          `;
         }).join("");
+
       }
+
+      avaliacoesAluno = evaluations.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
 
       // Histórico textual
       const historicoList = document.getElementById("historico-avaliacoes");
@@ -484,4 +514,101 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
   });
+  window.exportarAvaliacaoPDF = function (avaliacaoId) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const e = avaliacoesAluno.find(av => av.id === avaliacaoId);
+
+    if (!e) return alert("Avaliação não encontrada.");
+
+    let y = 20;
+    doc.setFontSize(16);
+    doc.text("Avaliação Física", 105, y, { align: "center" });
+    y += 10;
+
+    const campos = [
+      ["Peso", e.peso],
+      ["Altura", e.altura],
+      ["Gordura", e.gordura],
+      ["Massa Muscular", e.massaMuscular],
+      ["Peitoral", e.peitoral],
+      ["Cintura", e.cintura],
+      ["Quadril", e.quadril],
+      ["Braço", e.braco],
+      ["Coxa", e.coxa],
+      ["Panturrilha", e.panturrilha],
+      ["Frequência Cardíaca", e.frequenciaCardiaca],
+      ["Pressão Arterial", e.pressaoArterial],
+      ["Flexibilidade", e.flexibilidade],
+      ["Condicionamento", e.condicionamento],
+      ["Objetivo Atual", e.objetivoAtual],
+      ["Observações", e.observacoes]
+    ];
+
+    doc.setFontSize(12);
+    campos.forEach(([label, valor]) => {
+      if (valor) {
+        doc.text(`${label}: ${valor}`, 15, y);
+        y += 7;
+      }
+    });
+
+    doc.save(`avaliacao-${avaliacaoId}.pdf`);
+  };
+
+  window.exportarTreinoPDF = function (treinoId) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const t = treinosAluno.find(t => t.id === treinoId);
+
+    if (!t) return alert("Treino não encontrado.");
+
+    let y = 20;
+    doc.setFontSize(16);
+    doc.text(`Treino: ${t.title}`, 105, y, { align: "center" });
+    y += 10;
+
+    if (t.description) {
+      doc.setFontSize(12);
+      doc.text(`Descrição: ${t.description}`, 15, y);
+      y += 10;
+    }
+
+    if (Array.isArray(t.exercises)) {
+      doc.setFontSize(12);
+      t.exercises.forEach(e => {
+        doc.text(`• ${e.nome} – ${e.series}x${e.repeticoes} com ${e.carga}kg`, 15, y);
+        y += 7;
+      });
+    }
+
+    doc.save(`treino-${treinoId}.pdf`);
+  };
+
+  window.handleResetPassword = async function () {
+    const emailField = document.getElementById("email");
+    const email = emailField.value.trim();
+
+    if (!email) {
+      alert("Por favor, insira seu e-mail para redefinir a senha.");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Um link para redefinir sua senha foi enviado para o seu e-mail.");
+    } catch (error) {
+      let msg = "Erro ao enviar o e-mail de redefinição. ";
+      if (error.code === "auth/user-not-found") {
+        msg += "Este e-mail não está cadastrado.";
+      } else if (error.code === "auth/invalid-email") {
+        msg += "E-mail inválido.";
+      } else {
+        msg += error.message;
+      }
+      alert(msg);
+    }
+  };
+
+
 });
